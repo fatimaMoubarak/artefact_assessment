@@ -2,7 +2,7 @@ import pandas as pd
 
 
 @staticmethod
-def print_duplicate_offer_destination(df):
+def print_duplicate_offer_destination(df: pd.DataFrame) -> None:
     """Print rows where duplicate offer-destination pairs are found."""
     for idx, row in df.iterrows():
         # Collect all (offer, destination) pairs from the row

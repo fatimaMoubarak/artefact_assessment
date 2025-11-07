@@ -8,7 +8,7 @@ class TextTokenizer:
         self.english_stopwords = set(stopwords.words("english"))
         self.arabic_stopwords = set(stopwords.words("arabic"))
 
-    def remove_stopwords_and_tokenize(self, text, language_code):
+    def remove_stopwords_and_tokenize(self, text, language_code: str) -> list:
         """Tokenize the text and remove stopwords based on the language."""
 
         if not text:
@@ -26,7 +26,7 @@ class TextTokenizer:
         ]
         return filtered_tokens
 
-    def get_stopwords(self, language_code):
+    def get_stopwords(self, language_code: str) -> set:
         """Get the stopwords set based on language code."""
         if language_code == "ara":
             return self.arabic_stopwords

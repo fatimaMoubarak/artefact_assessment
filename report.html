@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Saudi Arabia Tourism Reviews Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #333;
+        line-height: 1.6;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 40px;
+        text-align: center;
+      }
+
+      header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 40px;
+      }
+
+      .section {
+        margin-bottom: 50px;
+        animation: fadeIn 0.8s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      h2 {
+        color: #1e3c72;
+        font-size: 1.8em;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #667eea;
+        display: inline-block;
+      }
+
+      .chart-container {
+        position: relative;
+        margin: 30px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .chart-wrapper {
+        position: relative;
+        height: 400px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin: 30px 0;
+      }
+
+      .card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .card h3 {
+        font-size: 1.3em;
+        margin-bottom: 15px;
+        opacity: 0.9;
+      }
+
+      .card .value {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin: 10px 0;
+      }
+
+      .insights {
+        background: #e8f4f8;
+        padding: 30px;
+        border-radius: 15px;
+        border-left: 5px solid #2a5298;
+        margin: 30px 0;
+      }
+
+      .insights h3 {
+        color: #1e3c72;
+        margin-bottom: 15px;
+        font-size: 1.4em;
+      }
+
+      .insights ul {
+        list-style: none;
+        padding-left: 0;
+      }
+
+      .insights li {
+        padding: 10px 0;
+        padding-left: 30px;
+        position: relative;
+      }
+
+      .insights li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #667eea;
+        font-weight: bold;
+        font-size: 1.2em;
+      }
+
+      .table-container {
+        overflow-x: auto;
+        margin: 20px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      th {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+      }
+
+      td {
+        padding: 15px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      tr:hover {
+        background: #f5f5f5;
+      }
+
+      .conclusion {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 15px;
+        margin-top: 40px;
+      }
+
+      .conclusion h3 {
+        font-size: 1.6em;
+        margin-bottom: 20px;
+      }
+
+      .word-cloud-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin: 30px 0;
+      }
+
+      .word-cloud-item {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .word-cloud-item h4 {
+        color: #1e3c72;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
+      .word-cloud-item img {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🕌 Saudi Arabia Tourism Reviews Analysis</h1>
+        <p>
+          Comprehensive insights from 9,300+ customer reviews across multiple
+          sectors
+        </p>
+      </header>
+
+      <div class="content">
+        <!-- Key Metrics -->
+        <div class="section">
+          <h2>📊 Key Performance Indicators</h2>
+          <div class="grid">
+            <div class="card">
+              <h3>Overall Sentiment</h3>
+              <div class="value">72.86%</div>
+              <p>Positive Reviews</p>
+            </div>
+            <div class="card">
+              <h3>Total Reviews</h3>
+              <div class="value">9,300+</div>
+              <p>Across All Sectors</p>
+            </div>
+            <div class="card">
+              <h3>Top Sector</h3>
+              <div class="value">96.99</div>
+              <p>Religious Sites Rating</p>
+            </div>
+            <div class="card">
+              <h3>Review Languages</h3>
+              <div class="value">76%</div>
+              <p>Arabic | 24% English</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sentiment Distribution -->
+        <div class="section">
+          <h2>😊 Sentiment Distribution</h2>
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <canvas id="sentimentChart"></canvas>
+            </div>
+          </div>
+          <div class="insights">
+            <h3>Key Insight</h3>
+            <ul>
+              <li>
+                Nearly 3 out of 4 reviews are positive, indicating strong
+                overall satisfaction
+              </li>
+              <li>
+                Only 22.42% negative reviews suggest most visitor experiences
+                meet or exceed expectations
+              </li>
+              <li>
+                Low neutral sentiment (4.72%) shows visitors have strong
+                opinions about their experiences
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Ratings by Sector -->
+        <div class="section">
+          <h2>🏆 Average Ratings by Offering Type</h2>
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <canvas id="ratingsChart"></canvas>
+            </div>
+          </div>
+          <div class="insights">
+            <h3>Performance Analysis</h3>
+            <ul>
+              <li>
+                <strong>Religious Sites</strong> (96.99) excel with near-perfect
+                ratings, reflecting their spiritual significance
+              </li>
+              <li>
+                <strong>Tourism Attractions</strong> (87.52) perform well,
+                showing quality experiences
+              </li>
+              <li>
+                <strong>Accommodation</strong> (79.40) has the lowest rating -
+                primary improvement opportunity
+              </li>
+              <li>
+                <strong>Food & Beverage</strong> (75.74) needs attention to
+                service quality and consistency
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Top Destinations -->
+        <div class="section">
+          <h2>🌟 Top 5 Most Reviewed Destinations</h2>
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <canvas id="destinationsChart"></canvas>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Destination</th>
+                  <th>Reviews</th>
+                  <th>Category</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>Masjid al-Haram</td>
+                  <td>566</td>
+                  <td>Religious</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>Umluj Beach</td>
+                  <td>524</td>
+                  <td>Tourism</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>The Saudi National Museum</td>
+                  <td>492</td>
+                  <td>Cultural</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>Prince Hussam Park</td>
+                  <td>427</td>
+                  <td>Recreation</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>Arruddaf Park</td>
+                  <td>427</td>
+                  <td>Recreation</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Reviews Over Time -->
+        <div class="section">
+          <h2>📈 Review Volume Trends</h2>
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <canvas id="timeChart"></canvas>
+            </div>
+          </div>
+          <div class="insights">
+            <h3>Temporal Analysis</h3>
+            <ul>
+              <li>
+                <strong>Peak periods:</strong> February 2021 (3,901 reviews) and
+                April 2021 (4,771 reviews)
+              </li>
+              <li>
+                <strong>Sharp decline:</strong> Reviews dropped dramatically
+                after mid-2021, likely due to COVID-19 impacts
+              </li>
+              <li>
+                <strong>Stabilization:</strong> Review volume has stabilized at
+                low levels (under 100/month) since mid-2021
+              </li>
+              <li>
+                <strong>Recovery potential:</strong> Current low volumes suggest
+                opportunity for tourism sector recovery
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Most Common Aspects -->
+        <div class="section">
+          <h2>💬 Most Discussed Aspects</h2>
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <canvas id="aspectsChart"></canvas>
+            </div>
+          </div>
+          <div class="insights">
+            <h3>Content Analysis</h3>
+            <ul>
+              <li>
+                <strong>Location/Place</strong> is the most discussed aspect
+                (مكان: 690, place: 523 mentions)
+              </li>
+              <li>
+                <strong>Accommodation</strong> features prominently (فندق/hotel:
+                455 combined mentions)
+              </li>
+              <li>
+                <strong>Service quality</strong> (staff: 96 mentions) is a key
+                differentiator
+              </li>
+              <li>
+                <strong>Bilingual reviews</strong> highlight the need for
+                comprehensive translation analysis
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Word Clouds Analysis -->
+        <div class="section">
+          <h2>☁️ Word Cloud Analysis by Sector</h2>
+          <p style="margin-bottom: 20px">
+            Visual representation of most frequently mentioned terms across
+            different tourism sectors, highlighting the prominence of
+            translation needs and key themes.
+          </p>
+
+          <div class="insights">
+            <h3>Translation Challenge</h3>
+            <ul>
+              <li>
+                The word "translated" appears prominently across all sectors,
+                indicating many reviews were machine-translated
+              </li>
+              <li>
+                This suggests a mix of Arabic and English content requiring
+                careful bilingual analysis
+              </li>
+              <li>
+                Original Arabic terms provide authentic customer voice and
+                cultural context
+              </li>
+            </ul>
+          </div>
+
+          <div class="insights" style="margin-top: 20px">
+            <h3>Sector-Specific Themes</h3>
+            <ul>
+              <li>
+                <strong>Tourism Attractions:</strong> Focus on "place",
+                "beautiful", "park", "visit" - emphasizing location quality
+              </li>
+              <li>
+                <strong>Accommodation:</strong> "Staff", "room", "hotel",
+                "clean" dominate - service and cleanliness are critical
+              </li>
+              <li>
+                <strong>Food & Beverage:</strong> "Taste", "best", "restaurant",
+                "delicious" highlight culinary experience
+              </li>
+              <li>
+                <strong>Retail:</strong> "Mall", "good", "shopping", "prices"
+                indicate value-focused discussions
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="section">
+          <h2>🎯 Strategic Recommendations</h2>
+          <div class="insights">
+            <h3>Priority Actions</h3>
+            <ul>
+              <li>
+                <strong>Improve Accommodation Sector:</strong> Focus on staff
+                training, room quality, and cleanliness standards
+              </li>
+              <li>
+                <strong>Enhance F&B Services:</strong> Invest in consistency,
+                taste quality, and service speed
+              </li>
+              <li>
+                <strong>Leverage Religious Tourism:</strong> Maintain high
+                standards while expanding supporting infrastructure
+              </li>
+              <li>
+                <strong>Diversify Offerings:</strong> Promote emerging
+                destinations like Umluj Beach to balance tourism load
+              </li>
+              <li>
+                <strong>Implement Bilingual Strategy:</strong> Ensure services
+                cater to both Arabic and English-speaking visitors
+              </li>
+              <li>
+                <strong>Monitor Recovery:</strong> Track review volumes as
+                indicator of tourism sector rebound
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Conclusion -->
+        <div class="conclusion">
+          <h3>📋 Executive Summary</h3>
+          <p style="margin-bottom: 15px">
+            This comprehensive analysis of 9,300+ tourism reviews reveals Saudi
+            Arabia's tourism sector has strong foundations with 72.86% positive
+            sentiment, particularly in religious tourism which achieves
+            exceptional ratings (96.99/100).
+          </p>
+          <p style="margin-bottom: 15px">
+            <strong>Key Strengths:</strong> Religious sites and cultural
+            attractions deliver outstanding experiences. Tourist diversity is
+            evident through bilingual reviews, with destinations like Masjid
+            al-Haram, Umluj Beach, and the National Museum leading in visitor
+            engagement.
+          </p>
+          <p style="margin-bottom: 15px">
+            <strong>Growth Opportunities:</strong> Accommodation (79.40) and
+            Food & Beverage (75.74) sectors require focused improvement in
+            service quality, cleanliness, and consistency. The dramatic
+            post-2021 decline in review volume suggests significant recovery
+            potential as the sector rebounds.
+          </p>
+          <p>
+            <strong>Next Steps:</strong> Implement targeted improvements in
+            lower-rated sectors, develop aspect-based sentiment analysis for
+            granular insights, and establish temporal monitoring to track
+            recovery patterns and seasonal trends.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Chart configurations
+      const chartColors = {
+        primary: "#667eea",
+        secondary: "#764ba2",
+        success: "#06d6a0",
+        warning: "#ffd166",
+        danger: "#ef476f",
+        info: "#118ab2",
+      };
+
+      // Sentiment Distribution Chart
+      const sentimentCtx = document
+        .getElementById("sentimentChart")
+        .getContext("2d");
+      new Chart(sentimentCtx, {
+        type: "doughnut",
+        data: {
+          labels: ["Positive (72.86%)", "Negative (22.42%)", "Neutral (4.72%)"],
+          datasets: [
+            {
+              data: [72.86, 22.42, 4.72],
+              backgroundColor: [
+                chartColors.success,
+                chartColors.danger,
+                chartColors.warning,
+              ],
+              borderWidth: 3,
+              borderColor: "#fff",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: {
+            position: "bottom",
+            labels: { fontSize: 14, padding: 20 },
+          },
+          title: {
+            display: true,
+            text: "Overall Sentiment Distribution",
+            fontSize: 18,
+            fontStyle: "bold",
+          },
+        },
+      });
+
+      // Ratings by Sector Chart
+      const ratingsCtx = document
+        .getElementById("ratingsChart")
+        .getContext("2d");
+      new Chart(ratingsCtx, {
+        type: "bar",
+        data: {
+          labels: [
+            "Religious",
+            "Tourism Attractions",
+            "Retail",
+            "Accommodation",
+            "Food & Beverage",
+          ],
+          datasets: [
+            {
+              label: "Average Rating",
+              data: [96.99, 87.52, 87.11, 79.4, 75.74],
+              backgroundColor: [
+                chartColors.success,
+                chartColors.primary,
+                chartColors.info,
+                chartColors.warning,
+                chartColors.danger,
+              ],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            yAxes: [
+              {
+                ticks: { beginAtZero: true, max: 100, fontSize: 12 },
+                gridLines: { color: "rgba(0,0,0,0.05)" },
+              },
+            ],
+            xAxes: [
+              {
+                gridLines: { display: false },
+                ticks: { fontSize: 12 },
+              },
+            ],
+          },
+          legend: { display: false },
+          title: {
+            display: true,
+            text: "Performance by Sector (Out of 100)",
+            fontSize: 18,
+            fontStyle: "bold",
+          },
+        },
+      });
+
+      // Top Destinations Chart
+      const destCtx = document
+        .getElementById("destinationsChart")
+        .getContext("2d");
+      new Chart(destCtx, {
+        type: "horizontalBar",
+        data: {
+          labels: [
+            "Masjid al-Haram",
+            "Umluj Beach",
+            "Saudi National Museum",
+            "Prince Hussam Park",
+            "Arruddaf Park",
+          ],
+          datasets: [
+            {
+              label: "Number of Reviews",
+              data: [566, 524, 492, 427, 427],
+              backgroundColor: chartColors.primary,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            xAxes: [
+              {
+                ticks: { beginAtZero: true },
+                gridLines: { color: "rgba(0,0,0,0.05)" },
+              },
+            ],
+            yAxes: [
+              {
+                gridLines: { display: false },
+              },
+            ],
+          },
+          legend: { display: false },
+          title: {
+            display: true,
+            text: "Review Volume by Destination",
+            fontSize: 18,
+            fontStyle: "bold",
+          },
+        },
+      });
+
+      // Reviews Over Time Chart
+      const timeCtx = document.getElementById("timeChart").getContext("2d");
+      new Chart(timeCtx, {
+        type: "line",
+        data: {
+          labels: [
+            "2021-02",
+            "2021-03",
+            "2021-04",
+            "2021-05",
+            "2021-06",
+            "2021-07",
+            "2021-08",
+            "2021-09",
+            "2021-10",
+            "2021-11",
+            "2021-12",
+            "2022-01",
+            "2022-02",
+            "2022-03",
+            "2022-04",
+            "2022-10",
+            "2023-10",
+          ],
+          datasets: [
+            {
+              label: "Number of Reviews",
+              data: [
+                3901, 178, 4771, 360, 80, 115, 101, 76, 77, 68, 81, 66, 48, 56,
+                18, 1, 3,
+              ],
+              borderColor: chartColors.primary,
+              backgroundColor: "rgba(102, 126, 234, 0.1)",
+              fill: true,
+              lineTension: 0.4,
+              borderWidth: 3,
+              pointRadius: 5,
+              pointBackgroundColor: chartColors.primary,
+              pointBorderColor: "#fff",
+              pointBorderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            yAxes: [
+              {
+                ticks: { beginAtZero: true },
+                gridLines: { color: "rgba(0,0,0,0.05)" },
+              },
+            ],
+            xAxes: [
+              {
+                gridLines: { display: false },
+              },
+            ],
+          },
+          legend: { display: false },
+          title: {
+            display: true,
+            text: "Review Volume Trends Over Time",
+            fontSize: 18,
+            fontStyle: "bold",
+          },
+        },
+      });
+
+      // Most Common Aspects Chart
+      const aspectsCtx = document
+        .getElementById("aspectsChart")
+        .getContext("2d");
+      new Chart(aspectsCtx, {
+        type: "bar",
+        data: {
+          labels: [
+            "مكان (Place-AR)",
+            "place (EN)",
+            "فندق (Hotel-AR)",
+            "المكان (The Place)",
+            "الفندق (The Hotel)",
+            "food",
+            "منتزه (Park)",
+            "staff",
+            "موقع (Location)",
+            "الاستقبال (Reception)",
+          ],
+          datasets: [
+            {
+              label: "Mentions",
+              data: [690, 523, 315, 312, 140, 114, 114, 96, 92, 90],
+              backgroundColor: chartColors.secondary,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            yAxes: [
+              {
+                ticks: { beginAtZero: true },
+                gridLines: { color: "rgba(0,0,0,0.05)" },
+              },
+            ],
+            xAxes: [
+              {
+                gridLines: { display: false },
+                ticks: {
+                  fontSize: 11,
+                  maxRotation: 45,
+                  minRotation: 45,
+                },
+              },
+            ],
+          },
+          legend: { display: false },
+          title: {
+            display: true,
+            text: "Top 10 Most Discussed Aspects (Bilingual)",
+            fontSize: 18,
+            fontStyle: "bold",
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

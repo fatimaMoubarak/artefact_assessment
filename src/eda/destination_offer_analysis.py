@@ -15,7 +15,7 @@ class DataAnalyzer:
         """
         self.df = df
 
-    def analyze_grouped_data(self, group_col, stats_col):
+    def analyze_grouped_data(self, group_col: str, stats_col: str) -> pd.DataFrame
         """
         General function to group the data and calculate statistics.
         """

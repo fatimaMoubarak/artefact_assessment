@@ -10,7 +10,7 @@ class TextCleaner:
         self.stop_words_eng = set(stopwords.words("english"))
         self.stop_words_ara = set(stopwords.words("arabic"))
 
-    def normalize_arabic(self, text):
+    def normalize_arabic(self, text: str) -> str:
         """Normalize Arabic text to handle variations in certain characters."""
         text = re.sub(r"[إأٱآا]", "ا", text)  # Normalize Alif variants
         text = re.sub(r"[ؤء]", "ء", text)  # Normalize Hamza variants
@@ -19,7 +19,7 @@ class TextCleaner:
         )  # Remove diacritics
         return text
 
-    def clean_text_english(self, text):
+    def clean_text_english(self, text: str) -> str:
         """Clean and normalize English text."""
         if pd.isna(text) or text == "":
             return ""
@@ -34,7 +34,7 @@ class TextCleaner:
 
         return text
 
-    def clean_text_arabic(self, text):
+    def clean_text_arabic(self, text: str) -> str:
         """Clean and normalize Arabic text."""
         if pd.isna(text) or text == "":
             return ""
@@ -51,7 +51,7 @@ class TextCleaner:
 
         return text
 
-    def apply_cleaning(self, row):
+    def apply_cleaning(self, row: pd.Series) -> str:
         """Apply text cleaning based on the language."""
         if row["language"] == "ara":
             return self.clean_text_arabic(row["text_for_analysis"])

@@ -4,7 +4,7 @@ import pandas as pd
 
 class TagParser:
     @staticmethod
-    def _parse_tags_cell(cell):
+    def _parse_tags_cell(cell) -> list:
         """Return a list of tag codes for this cell."""
         if pd.isna(cell):
             return []
