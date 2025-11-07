@@ -78,7 +78,7 @@ To inspect the latest static analysis summary, open `report.html` (double-click 
 
 ```bash
 start filename.html
-``
+```
 ## Testing & Validation Ideas
 - Add unit tests around `BatchProcessor.split_into_batches` and `AspectExtractor.extract_aspects` using mocked PyABSA outputs.
 - Capture sample responses under `tests/fixtures/` to guard against schema regressions in the FastAPI layer.
@@ -88,9 +88,3 @@ start filename.html
 - **Model download stalls:** Ensure GPU/CPU auto-detection is acceptable; override via `ModelLoader(auto_device=False)` for strictly-CPU environments.
 - **Large payloads timing out:** Lower `batch_size` in `BatchProcessor` or paginate requests upstream.
 - **Docker build fails on requirements:** Confirm the filename mismatch described earlier, or copy the file into the container as `requirements.txt`.
-
-## Contributing
-1. Create a feature branch.
-2. Keep docstrings/comments concise (ASCII preferred).
-3. Run linting/tests relevant to your change.
-4. Open a PR summarizing the new behavior and any data artifacts produced.
