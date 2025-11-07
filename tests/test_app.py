@@ -15,10 +15,18 @@ def test_predict_endpoint_success(monkeypatch):
         }
     ]
 
+    class FakeIloc:
+        def __init__(self, rows):
+            self._rows = rows
+
+        def __getitem__(self, index):
+            return self._rows[index]
+
     class FakeDataFrame:
         def __init__(self, rows):
             self.records = rows
             self.columns = list(rows[0].keys()) if rows else []
+            self.iloc = FakeIloc(rows)
 
     def fake_dataframe(rows):
         assert rows == [{"text_for_analysis": "Great staff"}]
@@ -46,9 +54,17 @@ def test_predict_endpoint_handles_empty_predictions(monkeypatch):
     from types import SimpleNamespace
     import app
 
+    class FakeIloc:
+        def __init__(self, rows):
+            self._rows = rows
+
+        def __getitem__(self, index):
+            return self._rows[index]
+
     class FakeDataFrame:
         def __init__(self, rows):
             self.records = rows
+            self.iloc = FakeIloc(rows)
 
     monkeypatch.setattr(
         app,

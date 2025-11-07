@@ -1,5 +1,5 @@
 def test_extract_aspects_flattens_model_output(monkeypatch):
-    from ..src.sentiment_aspect.aspect_extractor import AspectExtractor
+    from src.sentiment_aspect.aspect_extractor import AspectExtractor
 
     fake_results = [
         {
@@ -18,7 +18,7 @@ def test_extract_aspects_flattens_model_output(monkeypatch):
         return next(time_values)
 
     monkeypatch.setattr(
-        "..src.sentiment_aspect.aspect_extractor.time.time", fake_time
+        "src.sentiment_aspect.aspect_extractor.time.time", fake_time
     )
 
     class DummyModel:
@@ -52,7 +52,7 @@ def test_extract_aspects_flattens_model_output(monkeypatch):
 
 
 def test_extract_aspects_handles_empty_results():
-    from ..src.sentiment_aspect.aspect_extractor import AspectExtractor
+    from src.sentiment_aspect.aspect_extractor import AspectExtractor
 
     class DummyModel:
         def predict(self, *args, **kwargs):

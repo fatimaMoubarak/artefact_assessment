@@ -22,5 +22,8 @@ async def predict(data: List[TextData]):
 
         return results
 
+    except HTTPException as http_exc:
+        # Preserve explicit HTTP errors (e.g., validation or empty predictions)
+        raise http_exc
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error occurred: {str(e)}")

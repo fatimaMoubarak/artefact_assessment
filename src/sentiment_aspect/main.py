@@ -1,6 +1,6 @@
-from model_loader import ModelLoader
-from aspect_extractor import AspectExtractor
-from batch_processor import BatchProcessor
+from src.sentiment_aspect.model_loader import ModelLoader
+from src.sentiment_aspect.aspect_extractor import AspectExtractor
+from src.sentiment_aspect.batch_processor import BatchProcessor
 
 
 def predictor(data):
