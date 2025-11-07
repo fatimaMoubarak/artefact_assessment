@@ -1,1 +1,90 @@
-# artefact_assessment
+# Artefact Assessment
+
+FastAPI microservice for running multilingual aspect-based sentiment analysis (ABSA) on free-form text, plus a suite of notebooks/scripts for post-analysis and visualization of the extracted insights. The service wraps [PyABSA's](https://github.com/yangheng95/pyabsa) `AspectTermExtraction` models and exposes a single `/predict` endpoint capable of handling large batches efficiently.
+
+## Repository Tour
+- `app.py` & `src/api_utils/*`: FastAPI entrypoint plus Pydantic schemas that describe request/response payloads.
+- `src/sentiment_aspect/*`: Model loader, aspect extractor, and batch processor that orchestrate calls into PyABSA.
+- `src/post_analysis/*`: Utilities to normalize aspects, explore negative sentiment, and visualize distributions (Matplotlib/Seaborn with RTL-friendly settings).
+- `data/`, `origins/`, `submissions/`: Project-specific CSV/Excel inputs and intermediate exports (not tracked in detail here).
+- `Makefile`, `Dockerfile`: Container workflows for local builds/runs; see sections below.
+
+## Quick Start
+### 1. Local Python environment
+```bash
+python -m venv .venv
+. .venv/Scripts/activate  # Linux/macOS: source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requiremnets.txt
+uvicorn app:app --reload --port 8000
+```
+
+> **Note:** the dependency file is currently named `requiremnets.txt`. Either keep that spelling when installing locally or rename the file (and adjust the Dockerfile's `COPY requirements.txt` line) if you prefer the conventional name.
+
+### 2. Docker workflow
+```bash
+docker build -t artefact-assessment .
+docker run -p 8000:8000 artefact-assessment
+```
+Alternatively, use the provided `Makefile` targets: `make build`, `make run`, `make stop`, `make clean`, etc.
+
+## Calling the API
+Endpoint: `POST /predict`
+
+Request body (list of texts):
+```json
+[
+  {"text_for_analysis": "The hotel staff was lovely but the room was tiny."},
+  {"text_for_analysis": "Loved the coffee, hated the parking situation."}
+]
+```
+
+Response (one row per detected aspect):
+```json
+[
+  {
+    "text_id": 0,
+    "aspect": "staff",
+    "evidence_span": "staff was lovely",
+    "polarity": "Positive",
+    "confidence": 0.92,
+    "model": "pyabsa-multilingual",
+    "latency_ms": 137
+  },
+  {
+    "text_id": 1,
+    "aspect": "parking",
+    "evidence_span": "parking situation",
+    "polarity": "Negative",
+    "confidence": 0.78,
+    "model": "pyabsa-multilingual",
+    "latency_ms": 102
+  }
+]
+```
+
+Behind the scenes the request payload is converted into a Pandas DataFrame, split into 100-text batches (`BatchProcessor`), processed via `AspectExtractor.extract_aspects`, and flattened into the schema above.
+
+## Post-Analysis Toolkit
+The `src/post_analysis` package offers helper scripts once predictions are saved to disk (typically as CSV/Parquet):
+- `normalize_aspect.py`: cleans and standardizes aspect labels ahead of aggregations.
+- `aspects_analyzer.py`, `negative_ana.py`: slice-and-dice routines for offers/destinations with emphasis on negative sentiment.
+- `aspects_visualizer.py`, `confidence_viz.py`: Matplotlib/Seaborn plots (RTL-aware via `config.py`) for frequencies, sentiment balance, and confidence bands.
+
+These modules assume a DataFrame with at least `aspect_normalized`, `polarity`, `offer`, `destination`, and `confidence` columns. Import them into notebooks or small CLI wrappers depending on your workflow.
+
+## Testing & Validation Ideas
+- Add unit tests around `BatchProcessor.split_into_batches` and `AspectExtractor.extract_aspects` using mocked PyABSA outputs.
+- Capture sample responses under `tests/fixtures/` to guard against schema regressions in the FastAPI layer.
+- For visual modules, rely on notebook-based smoke tests or screenshot diffs.
+
+## Troubleshooting
+- **Model download stalls:** Ensure GPU/CPU auto-detection is acceptable; override via `ModelLoader(auto_device=False)` for strictly-CPU environments.
+- **Large payloads timing out:** Lower `batch_size` in `BatchProcessor` or paginate requests upstream.
+- **Docker build fails on requirements:** Confirm the filename mismatch described earlier, or copy the file into the container as `requirements.txt`.
+
+## Contributing
+1. Create a feature branch.
+2. Keep docstrings/comments concise (ASCII preferred).
+3. Run linting/tests relevant to your change.
+4. Open a PR summarizing the new behavior and any data artifacts produced.
